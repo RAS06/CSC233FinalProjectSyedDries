@@ -2,6 +2,8 @@ import tkinter
 from tkinter.commondialog import Dialog
 from tkinter.dialog import Dialog
 from tkinter import simpledialog
+from tkinter import ttk
+
 import sqlite3
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer
@@ -225,95 +227,167 @@ def handle_pdf():
 
     conn = sqlite3.connect('identifier.sqlite')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM student")
+    if check_table_exists(conn, "student"):
+        cursor.execute("SELECT * FROM student")
 
 
-    students = []
-    for item in cursor.fetchall():
-        students.append(list(item))
+        students = []
+        for item in cursor.fetchall():
+            students.append(list(item))
 
-    for std in students:
-        print(type(std))
+        for std in students:
+            print(type(std))
 
-    # students = [
-    #     ['Caleb', 78, 85, 98, 63, 85, 96],
-    #     ['Riz', 89, 95, 76, 89, 90, 94],
-    #     ['Reese', 76, 90, 73, 86, 98, 87],
-    #     ['Grace', 90, 98, 100, 67, 84, 88],
-    #     ['Ethan', 75, 87, 78, 90, 87, 65],
-    #     ['Chance', 89, 95, 76, 89, 90, 94],
-    #     ['Eli', 76, 90, 73, 86, 98, 87],
-    #     ['Chase', 76, 90, 73, 86, 98, 87],
-    #     ['Ella', 89, 95, 76, 89, 90, 94],
-    #     ['Chloe', 75, 87, 78, 90, 87, 65]
-    # ]
-
-
-    tableData = [headers]
-
-    for student in students:
-        hwAvg = round((student[1] + student[2] + student[3]) / 3.0, 2)
-        quizAvg = round((student[4] + student[5] + student[6]) / 3.0, 2)
-        ovrGrade = round((hwAvg + quizAvg) / 2.0, 2)
-        student.append(hwAvg)
-        student.append(quizAvg)
-        student.append(ovrGrade)
-        tableData.append(student)
-
-    hw1Data, hw2Data, hw3Data, quiz1Data, quiz2Data, quiz3Data, hwAvgData, quizAvgData, ovrGradeData = [], [], [], [], [], [], [], [], []
-
-    for student in students:
-        hw1Data.append(student[1])
-        hw2Data.append(student[2])
-        hw3Data.append(student[3])
-        quiz1Data.append(student[4])
-        quiz2Data.append(student[5])
-        quiz3Data.append(student[6])
-        hwAvgData.append(student[7])
-        quizAvgData.append(student[8])
-        ovrGradeData.append(student[9])
+        # students = [
+        #     ['Caleb', 78, 85, 98, 63, 85, 96],
+        #     ['Riz', 89, 95, 76, 89, 90, 94],
+        #     ['Reese', 76, 90, 73, 86, 98, 87],
+        #     ['Grace', 90, 98, 100, 67, 84, 88],
+        #     ['Ethan', 75, 87, 78, 90, 87, 65],
+        #     ['Chance', 89, 95, 76, 89, 90, 94],
+        #     ['Eli', 76, 90, 73, 86, 98, 87],
+        #     ['Chase', 76, 90, 73, 86, 98, 87],
+        #     ['Ella', 89, 95, 76, 89, 90, 94],
+        #     ['Chloe', 75, 87, 78, 90, 87, 65]
+        # ]
 
 
-    footers = [
-        'Average',
-        round(float(sum(hw1Data) / len(hw1Data)), 2),
-        round(float(sum(hw2Data) / len(hw2Data)), 2),
-        round(float(sum(hw3Data) / len(hw3Data)), 2),
-        round(float(sum(quiz1Data) / len(quiz1Data)), 2),
-        round(float(sum(quiz2Data) / len(quiz2Data)), 2),
-        round(float(sum(quiz3Data) / len(quiz3Data)), 2),
-        round(float(sum(hwAvgData) / len(hwAvgData)), 2),
-        round(float(sum(quizAvgData) / len(quizAvgData)), 2),
-        round(float(sum(ovrGradeData) / len(ovrGradeData)), 2)
-    ]
-    tableData.append(footers)
+        tableData = [headers]
 
-    letGradeA, letGradeB, letGradeC, letGradeD, letGradeF = 0, 0, 0, 0, 0
+        for student in students:
+            hwAvg = round((student[1] + student[2] + student[3]) / 3.0, 2)
+            quizAvg = round((student[4] + student[5] + student[6]) / 3.0, 2)
+            ovrGrade = round((hwAvg + quizAvg) / 2.0, 2)
+            student.append(hwAvg)
+            student.append(quizAvg)
+            student.append(ovrGrade)
+            tableData.append(student)
 
-    for student in students:
-        if student[-1] < 60:
-            letGradeF += 1
-        elif student[-1] < 70:
-            letGradeD += 1
-        elif student[-1] < 80:
-            letGradeC += 1
-        elif student[-1] < 90:
-            letGradeB += 1
-        else:
-            letGradeA += 1
+        hw1Data, hw2Data, hw3Data, quiz1Data, quiz2Data, quiz3Data, hwAvgData, quizAvgData, ovrGradeData = [], [], [], [], [], [], [], [], []
 
-    letGradeData = [
-        ["", "Letter Grades:", "", "A", "B", "C", "D", "F", ""],
-        ["", "Student Totals:", "", letGradeA, letGradeB, letGradeC, letGradeD, letGradeF, ""]
-    ]
+        for student in students:
+            hw1Data.append(student[1])
+            hw2Data.append(student[2])
+            hw3Data.append(student[3])
+            quiz1Data.append(student[4])
+            quiz2Data.append(student[5])
+            quiz3Data.append(student[6])
+            hwAvgData.append(student[7])
+            quizAvgData.append(student[8])
+            ovrGradeData.append(student[9])
+
+
+        footers = [
+            'Average',
+            round(float(sum(hw1Data) / len(hw1Data)), 2),
+            round(float(sum(hw2Data) / len(hw2Data)), 2),
+            round(float(sum(hw3Data) / len(hw3Data)), 2),
+            round(float(sum(quiz1Data) / len(quiz1Data)), 2),
+            round(float(sum(quiz2Data) / len(quiz2Data)), 2),
+            round(float(sum(quiz3Data) / len(quiz3Data)), 2),
+            round(float(sum(hwAvgData) / len(hwAvgData)), 2),
+            round(float(sum(quizAvgData) / len(quizAvgData)), 2),
+            round(float(sum(ovrGradeData) / len(ovrGradeData)), 2)
+        ]
+        tableData.append(footers)
+
+        letGradeA, letGradeB, letGradeC, letGradeD, letGradeF = 0, 0, 0, 0, 0
+
+        for student in students:
+            if student[-1] < 60:
+                letGradeF += 1
+            elif student[-1] < 70:
+                letGradeD += 1
+            elif student[-1] < 80:
+                letGradeC += 1
+            elif student[-1] < 90:
+                letGradeB += 1
+            else:
+                letGradeA += 1
+
+        letGradeData = [
+            ["", "Letter Grades:", "", "A", "B", "C", "D", "F", ""],
+            ["", "Student Totals:", "", letGradeA, letGradeB, letGradeC, letGradeD, letGradeF, ""]
+        ]
+
+        createPdf(tableData, letGradeData, className, headers, footers)
+
     conn.close()
-    createPdf(tableData, letGradeData, className, headers, footers)
+
+
+def displayWindow():
+    displayWindow = tkinter.Tk()
+    displayWindow.geometry("900x500")
+    displayWindow.title("Grades")
+
+    tree = ttk.Treeview(displayWindow, columns=("ID", "HW1", "HW2", "HW3", "Quiz1", "Quiz2", "Quiz3", "Average"),
+                        show='headings')
+    tree.heading("ID", text="Student ID")
+    tree.column("ID", minwidth=0, width=100, stretch=False)
+    tree.heading("HW1", text="HW1")
+    tree.column("HW1", minwidth=0, width=100, stretch=False)
+    tree.heading("HW2", text="HW2")
+    tree.column("HW2", minwidth=0, width=100, stretch=False)
+    tree.heading("HW3", text="HW3")
+    tree.column("HW3", minwidth=0, width=100, stretch=False)
+    tree.heading("Quiz1", text="Quiz1")
+    tree.column("Quiz1", minwidth=0, width=100, stretch=False)
+    tree.heading("Quiz2", text="Quiz2")
+    tree.column("Quiz2", minwidth=0, width=100, stretch=False)
+    tree.heading("Quiz3", text="Quiz3")
+    tree.column("Quiz3", minwidth=0, width=100, stretch=False)
+    tree.heading("Average", text="Average")
+    tree.column("Average", minwidth=0, width=100, stretch=False)
+    tree.pack(fill=tkinter.BOTH, expand=True)
+
+    conn = sqlite3.connect('identifier.sqlite')
+    cursor = conn.cursor()
+    if check_table_exists(conn, "student"):
+        cursor.execute('''SELECT id, HW1, HW2, HW3, Quiz1, Quiz2, Quiz3, (HW1 + HW2 + HW3 + Quiz1 + Quiz2 + Quiz3)/6 
+                   as Average FROM student
+                   where NOT (
+                   HW1 is null or
+                   HW2 is null or
+                   HW3 is null or
+                   Quiz1 is null or
+                   Quiz2 is null or
+                   Quiz3 is null
+                   )''')
+        results = cursor.fetchall()
+        cursor.execute("SELECT AVG(HW1), AVG(HW2), AVG(HW3), AVG(Quiz1), AVG(Quiz2), AVG(Quiz3)FROM student")
+        avg = cursor.fetchall()
+        conn.close()
+
+        for row in results:
+            tree.insert("", "end", values=row)
+
+        avg = avg[0]
+        avg2 = ["Average:"]
+        for i in avg:
+            i = round(i)
+            avg2.append(i)
+        avg = (avg2[0], avg2[1], avg2[2], avg2[3], avg2[4], avg2[5], avg2[6])
+        tree.insert("", "end", values=avg)
+
+        displayWindow.mainloop()
+
+
+def clearDatabase():
+    conn = sqlite3.connect('identifier.sqlite')
+    cursor = conn.cursor()
+    cursor.execute("DROP TABLE IF EXISTS student")
+    conn.close()
+
+def check_table_exists(conn, table_name):
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+    return cursor.fetchone() is not None
 
 
 def main():
     # Create main window
     window = tkinter.Tk()
-    window.geometry("900x500")
+    window.geometry("300x200")
     window.title("Final Project")
 
     # Title
@@ -324,11 +398,21 @@ def main():
     button = tkinter.Button(window, text="Add Student", command=lambda: handle(window))
     button.grid(column = 0, row = 1)
 
+    #Show
+    button2 = tkinter.Button(window, text="Show current database", command=lambda: displayWindow())
+    button2.grid(column=0, row=2)
+
     #pdfGenerator
     mk_pdf = tkinter.Button(window, text="Make PDF", command=lambda: handle_pdf())
-    mk_pdf.grid(column = 0, row = 2)
+    mk_pdf.grid(column = 0, row = 3)
 
-# Start the GUI
+    clearButton = tkinter.Button(window, text="Clear Database", command=lambda: clearDatabase())
+    clearButton.grid(column = 0, row = 4)
+
+
+
+
+    # Start the GUI
     window.mainloop()
 
 main()
