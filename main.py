@@ -1,4 +1,5 @@
 import tkinter
+from tkinter import ttk
 from tkinter.commondialog import Dialog
 from tkinter.dialog import Dialog
 from tkinter import simpledialog
@@ -53,7 +54,7 @@ class dialogIn: #https://stackoverflow.com/questions/10057672/correct-way-to-imp
         self.top.Quiz3EntryBox = tkinter.Entry(top)
         self.top.Quiz3EntryBox.pack()
 
-        self.submit = tkinter.Button(top, text='Submit', command= self.send)
+        self.submit = tkinter.Button(top, text='Submit', command=self.send)
         self.submit.pack()
 
     def send(self):
@@ -120,6 +121,59 @@ def handle2(root):
 
     conn.close()
 
+def displayWindow():
+    displayWindow = tkinter.Tk()
+    displayWindow.geometry("900x500")
+    displayWindow.title("Grades")
+
+    tree = ttk.Treeview(displayWindow, columns=("ID", "HW1", "HW2", "HW3", "Quiz1", "Quiz2", "Quiz3", "Average"), show='headings')
+    tree.heading("ID", text="Student ID")
+    tree.column("ID", minwidth=0, width = 100, stretch=False)
+    tree.heading("HW1", text="HW1")
+    tree.column("HW1", minwidth=0, width = 100, stretch=False)
+    tree.heading("HW2", text="HW2")
+    tree.column("HW2", minwidth=0, width = 100, stretch=False)
+    tree.heading("HW3", text="HW3")
+    tree.column("HW3", minwidth=0, width = 100, stretch=False)
+    tree.heading("Quiz1", text="Quiz1")
+    tree.column("Quiz1", minwidth=0, width = 100, stretch=False)
+    tree.heading("Quiz2", text="Quiz2")
+    tree.column("Quiz2", minwidth=0, width = 100, stretch=False)
+    tree.heading("Quiz3", text="Quiz3")
+    tree.column("Quiz3", minwidth=0, width = 100, stretch=False)
+    tree.heading("Average", text="Average")
+    tree.column("Average", minwidth=0, width = 100, stretch=False)
+    tree.pack(fill=tkinter.BOTH, expand=True)
+
+    conn = sqlite3.connect('identifier.sqlite')
+    cursor = conn.cursor()
+    cursor.execute('''SELECT id, HW1, HW2, HW3, Quiz1, Quiz2, Quiz3, (HW1 + HW2 + HW3 + Quiz1 + Quiz2 + Quiz3)/6 
+                   as Average FROM student 
+                   where NOT (
+                   HW1 is null or
+                   HW2 is null or
+                   HW3 is null or
+                   Quiz1 is null or
+                   Quiz2 is null or
+                   Quiz3 is null
+                   )''')
+    results = cursor.fetchall()
+    cursor.execute("SELECT AVG(HW1), AVG(HW2), AVG(HW3), AVG(Quiz1), AVG(Quiz2), AVG(Quiz3)FROM student")
+    avg = cursor.fetchall()
+    conn.close()
+
+    for row in results:
+        tree.insert("", "end", values=row)
+
+    avg = avg[0]
+    avg2 = ["Average:"]
+    for i in avg:
+        i = round(i)
+        avg2.append(i)
+    avg = (avg2[0],avg2[1],avg2[2],avg2[3],avg2[4],avg2[5],avg2[6])
+    tree.insert("", "end", values = avg)
+    
+    displayWindow.mainloop()
 
 def main():
     student_data = []
@@ -136,6 +190,10 @@ def main():
     # Create a button
     button = tkinter.Button(window, text="Add Student", command=lambda: handle(window))
     button.grid(column = 0, row = 1)
+
+    # Create a button
+    button2 = tkinter.Button(window, text="Display Grades", command=lambda: displayWindow())
+    button2.grid(column = 0, row = 2)
 
 # Start the GUI
     window.mainloop()
